@@ -1,0 +1,50 @@
+﻿@*
+    Partial View cho tất cả các modal liên quan đến Categories
+*@
+
+<!-- Add Category Modal -->
+<div class="Modal-container" id="modalAddCategory">
+    <div class="Modal-content">
+        <div class="form-header">
+            <h1>Thêm danh mục mới</h1>
+        </div>
+        <div class="form-body">
+            <div class="form-group">
+                <label for="addCategoryName">Tên danh mục</label>
+                <input type="text" id="addCategoryName" class="form-control" placeholder="Nhập tên danh mục">
+            </div>
+            <div class="form-group">
+                <label for="addCategoryColor">Màu sắc</label>
+                <input type="color" id="addCategoryColor" class="form-control" value="#3498db">
+            </div>
+        </div>
+        <div class="form-footer">
+            <button class="btn btn-secondary" id="btnCancelAddCategory">Hủy</button>
+            <button class="btn btn-primary" id="btnSubmitAddCategory">Thêm danh mục</button>
+        </div>
+    </div>
+</div>
+
+<!-- Update Category Modal -->
+<div class="Modal-container" id="modalUpdateCategory">
+    <div class="Modal-content">
+        <div class="form-header">
+            <h1>Cập nhật danh mục</h1>
+        </div>
+        <div class="form-body">
+            <input type="hidden" id="updateCategoryId">
+            <div class="form-group">
+                <label for="updateCategoryName">Tên danh mục</label>
+                <input type="text" id="updateCategoryName" class="form-control" placeholder="Nhập tên danh mục">
+            </div>
+            <div class="form-group">
+                <label for="updateCategoryColor">Màu sắc</label>
+                <input type="color" id="updateCategoryColor" class="form-control" value="#3498db">
+            </div>
+        </div>
+        <div class="form-footer">
+            <button class="btn btn-secondary" id="btnCancelUpdateCategory">Hủy</button>
+            <button class="btn btn-primary" id="btnSubmitUpdateCategory">Lưu danh mục</button>
+        </div>
+    </div>
+</div>

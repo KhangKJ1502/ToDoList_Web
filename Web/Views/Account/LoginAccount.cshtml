@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿
+
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
@@ -119,7 +121,7 @@
 
             <div class="links">
                 <a href="#">Quên mật khẩu?</a>
-                <a href="#">Đăng ký tài khoản mới</a>
+                <a asp-controller="Account" asp-action="RegisterAccount">Đăng ký tài khoản mới</a>
             </div>
         </form>
     </div>
@@ -170,7 +172,7 @@
                 password: password
             };
 
-            fetch('/api/login', {  // 👉 Đổi thành API login thật của bạn
+            fetch('api/login', {  // 👉 Đổi thành API login thật của bạn
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -179,10 +181,11 @@
             })
             .then(response => response.json())
             .then(data => {
+                console.log(data);
                 if (data.success) {
                     showToast("Đăng nhập thành công!", true);
                     setTimeout(() => {
-                        window.location.href = '/home'; // 👉 Chuyển hướng trang sau khi login
+                        window.location.href = '/home/index'; // 👉 Chuyển hướng trang sau khi login
                     }, 1500);
                 } else {
                     showToast("Đăng nhập thất bại: " + (data.message || "Vui lòng kiểm tra lại."), false);

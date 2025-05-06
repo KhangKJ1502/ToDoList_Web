@@ -1,8 +1,304 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Dashboard - TaskMaster";
+    Layout = "_Layout";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="Dashboard-container">
+    <div id="toastContainer" class="toast-container"></div>
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-logo">
+            <h2>TaskMaster</h2>
+        </div>
+
+        <ul class="sidebar-menu">
+            <li><a href="#" class="active">Dashboard</a></li>
+            <li><a href="#">Tất cả công việc</a></li>
+            <li><a href="#">Lịch</a></li>
+            <li><a href="#">Báo cáo</a></li>
+            <li><a href="#">Cài đặt</a></li>
+        </ul>
+
+        <!-- Render Categories Partial View -->
+        @await Html.PartialAsync("~/Views/Category/_Categories.cshtml")
+
+        <div class="sidebar-tags">
+            <h3>Thẻ</h3>
+            <ul class="tag-list">
+                <li>Khẩn cấp</li>
+                <li>Tuần này</li>
+                <li>Dự án A</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="header">
+            <h1>Dashboard</h1>
+
+            <div class="search-bar">
+                <input type="text" placeholder="Tìm kiếm công việc...">
+            </div>
+
+            <div class="user-profile">
+                <img src="/api/placeholder/40/40" alt="Avatar">
+                <span>Nguyễn Văn A</span>
+            </div>
+        </div>
+
+        <!-- Dashboard Stats -->
+        <div class="dashboard-stats">
+            <div class="stat-card">
+                <h3>Tổng công việc</h3>
+                <div class="number">24</div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Đang thực hiện</h3>
+                <div class="number">8</div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Hoàn thành</h3>
+                <div class="number">12</div>
+            </div>
+
+            <div class="stat-card">
+                <h3>Quá hạn</h3>
+                <div class="number">4</div>
+            </div>
+        </div>
+
+        <!-- Due Today Section -->
+        <div class="tasks-section">
+            <div class="section-header">
+                <h2>Công việc hôm nay</h2>
+            </div>
+
+            <ul class="task-list">
+                <li class="task-item">
+                    <input type="checkbox" class="task-checkbox">
+                    <div class="task-content">
+                        <div class="task-title">Họp với nhóm phát triển</div>
+                        <div class="task-meta">
+                            <div class="task-due">Hôm nay, 14:00</div>
+                            <div class="task-priority priority-high">Quan trọng</div>
+                            <div class="task-category">Công việc</div>
+                        </div>
+                    </div>
+                </li>
+
+                <li class="task-item">
+                    <input type="checkbox" class="task-checkbox">
+                    <div class="task-content">
+                        <div class="task-title">Hoàn thiện báo cáo quý</div>
+                        <div class="task-meta">
+                            <div class="task-due">Hôm nay, 17:30</div>
+                            <div class="task-priority priority-medium">Trung bình</div>
+                            <div class="task-category">Công việc</div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Upcoming Section -->
+        <div class="tasks-section">
+            <div class="section-header">
+                <h2>Sắp tới</h2>
+            </div>
+
+            <ul class="task-list">
+                <li class="task-item">
+                    <input type="checkbox" class="task-checkbox">
+                    <div class="task-content">
+                        <div class="task-title">Đọc sách về quản lý thời gian</div>
+                        <div class="task-meta">
+                            <div class="task-due">Ngày mai, 09:00</div>
+                            <div class="task-priority priority-low">Thấp</div>
+                            <div class="task-category">Cá nhân</div>
+                        </div>
+                    </div>
+                </li>
+
+                <li class="task-item">
+                    <input type="checkbox" class="task-checkbox">
+                    <div class="task-content">
+                        <div class="task-title">Tìm hiểu về React Hook</div>
+                        <div class="task-meta">
+                            <div class="task-due">30/04/2025</div>
+                            <div class="task-priority priority-medium">Trung bình</div>
+                            <div class="task-category">Học tập</div>
+                        </div>
+                    </div>
+                </li>
+
+                <li class="task-item">
+                    <input type="checkbox" class="task-checkbox">
+                    <div class="task-content">
+                        <div class="task-title">Gửi email cho khách hàng</div>
+                        <div class="task-meta">
+                            <div class="task-due">02/05/2025</div>
+                            <div class="task-priority priority-high">Quan trọng</div>
+                            <div class="task-category">Công việc</div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Add Task Button -->
+        <div class="add-task-btn" onclick="addNote()">+</div>
+    </div>
 </div>
+
+<!-- Add Task Modal -->
+<div class="Modal-container" id="modalAddTask">
+    <div class="Modal-content">
+        <div class="form-header">
+            <h1>Tạo công việc mới</h1>
+        </div>
+        <div class="form-body">
+            <div class="form-group">
+                <label for="title">Tiêu đề công việc *</label>
+                <input type="text" id="title" class="form-control" placeholder="Nhập tiêu đề công việc">
+            </div>
+
+            <div class="form-group">
+                <label for="description">Mô tả</label>
+                <textarea id="description" class="form-control" placeholder="Nhập mô tả chi tiết về công việc"></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="category">Danh mục</label>
+                    <select id="category" class="form-control">
+                        <option value="" selected disabled>Chọn danh mục</option>
+                        <option value="1">Công việc</option>
+                        <option value="2">Cá nhân</option>
+                        <option value="3">Học tập</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="priority">Mức độ ưu tiên</label>
+                    <select id="priority" class="form-control">
+                        <option value="low">Thấp</option>
+                        <option value="medium" selected>Trung bình</option>
+                        <option value="high">Cao</option>
+                        <option value="urgent">Khẩn cấp</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="status">Trạng thái</label>
+                    <select id="status" class="form-control">
+                        <option value="pending" selected>Chờ xử lý</option>
+                        <option value="in_progress">Đang thực hiện</option>
+                        <option value="completed">Hoàn thành</option>
+                        <option value="archived">Lưu trữ</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="dueDate">Hạn hoàn thành</label>
+                    <input type="date" id="dueDate" class="form-control">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="tags">Thẻ</label>
+                <div class="tag-input-container">
+                    <input type="text" id="tags" class="form-control" placeholder="Nhập tên thẻ và nhấn Enter">
+                    <div class="selected-tags">
+                        <div class="tag-item">
+                            Báo cáo
+                            <span class="tag-remove">×</span>
+                        </div>
+                        <div class="tag-item">
+                            Tài chính
+                            <span class="tag-remove">×</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Công việc nhỏ</label>
+                <div class="subtasks-container">
+                    <div class="subtask-item">
+                        <input type="text" placeholder="Nhập công việc nhỏ" value="Thu thập số liệu từ các phòng ban">
+                        <button class="subtask-remove">×</button>
+                    </div>
+                    <div class="subtask-item">
+                        <input type="text" placeholder="Nhập công việc nhỏ" value="Phân tích số liệu">
+                        <button class="subtask-remove">×</button>
+                    </div>
+                    <div class="subtask-item">
+                        <input type="text" placeholder="Nhập công việc nhỏ" value="Soạn nội dung báo cáo">
+                        <button class="subtask-remove">×</button>
+                    </div>
+                </div>
+                <button class="add-subtask">
+                    <span>+</span> Thêm công việc nhỏ
+                </button>
+            </div>
+        </div>
+
+        <div class="form-footer">
+            <button class="btn btn-secondary" onclick="closeModal()">Hủy</button>
+            <button class="btn btn-primary">Tạo công việc</button>
+        </div>
+    </div>
+</div>
+
+<!-- Include Category Modals (Add/Edit/Delete) -->
+@await Html.PartialAsync("~/Views/Category/_CategoriesModals.cshtml")
+
+@section Scripts {
+    <script src="~/js/dashboard.js"></script>
+    <script src="~/js/task.js"></script>
+    <!-- Thêm tham chiếu đến category.js -->
+    <script src="~/js/category.js"></script>
+}
+
+<script>
+    // Dashboard specific functions
+    function addNote() {
+        document.getElementById("modalAddTask").style.display = "flex";
+    }
+
+    function closeModal() {
+        document.getElementById("modalAddTask").style.display = "none";
+    }
+
+    // Add event to close modal when clicking outside
+    window.onclick = function(event) {
+        let modalTask = document.getElementById("modalAddTask");
+
+        if (event.target === modalTask) {
+            modalTask.style.display = "none";
+        }
+
+        // Các sự kiện đóng modal category được xử lý trong category.js
+    }
+
+    // Show notification toast
+    function showToast(message, type = 'success') {
+        const toastContainer = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.textContent = message;
+
+        toastContainer.appendChild(toast);
+
+        setTimeout(() => {
+            toast.remove();
+        }, 3000);
+    }
+</script>

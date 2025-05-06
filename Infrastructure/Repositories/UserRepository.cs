@@ -3,8 +3,6 @@ using Domain.Interfaces;
 using Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Infrastructure.Repositories
@@ -20,6 +18,13 @@ namespace Infrastructure.Repositories
 
         public async System.Threading.Tasks.Task AddAsync(User user)
         {
+            var existingUser = await _context.Users
+                .FirstOrDefaultAsync(u => u.Username == user.Username);
+
+            if (existingUser != null) {
+                throw new InvalidOperationException("Username already taken.");
+            }
+
             var infrastructureUser = new Infrastructure.Persistence.Models.User
             {
                 Username = user.Username,
@@ -30,7 +35,6 @@ namespace Infrastructure.Repositories
                 CreatedAt = user.CreatedAt,
                 UpdatedAt = user.UpdatedAt
             };
-            Console.WriteLine(infrastructureUser.Email);
 
             await _context.Users.AddAsync(infrastructureUser);
             await _context.SaveChangesAsync();
@@ -40,6 +44,27 @@ namespace Infrastructure.Repositories
         {
             var infrastructureUser = await _context.Users
                 .FirstOrDefaultAsync(u => u.Username == username);
+
+            if (infrastructureUser == null)
+                return null;
+
+            return new User
+            {
+                UserId = infrastructureUser.UserId,
+                Username = infrastructureUser.Username,
+                Email = infrastructureUser.Email,
+                PasswordHash = infrastructureUser.PasswordHash,
+                FirstName = infrastructureUser.FirstName,
+                LastName = infrastructureUser.LastName,
+                CreatedAt = infrastructureUser.CreatedAt,
+                UpdatedAt = infrastructureUser.UpdatedAt
+            };
+        }
+
+        public async Task<User> GetByEmailAsync(string email)
+        {
+            var infrastructureUser = await _context.Users
+                .FirstOrDefaultAsync(u => u.Email == email);
 
             if (infrastructureUser == null)
                 return null;
@@ -105,7 +130,5 @@ namespace Infrastructure.Repositories
         {
             return await _context.Users.AnyAsync(u => u.Username == username);
         }
-
-        // Remove the unused NameAsync method
     }
 }
