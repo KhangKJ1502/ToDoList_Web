@@ -5,8 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Application.DTOs
-{
+
     namespace Application.DTOs
     {
         public class TaskDTO
@@ -29,16 +28,16 @@ namespace Application.DTOs
 
             //public List<AttachmentDTO>? Attachments { get; set; }
 
-            //public CategoryDTO? Category { get; set; }
+            public CategoriesDTO? Category { get; set; }
 
-            //public List<CommentDTO>? Comments { get; set; }
+            public List<CommentDTO>? Comments { get; set; }
 
-            //public List<ReminderDTO>? Reminders { get; set; }
+            public List<ReminderDTO>? Reminders { get; set; }
 
-            //public List<SubtaskDTO>? Subtasks { get; set; }
+            public List<SubtaskDTO>? Subtasks { get; set; }
 
-            //public List<TagDTO>? Tags { get; set; }
+            public List<TagDTO>? Tags { get; set; }
         }
     }
-}
+
 
