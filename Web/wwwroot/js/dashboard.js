@@ -14,7 +14,8 @@ function setupDashboard() {
     console.log('Dashboard ready!');
 
     // Ví dụ: Thống kê về số lượng công việc (có thể fetch từ API)
-    loadTaskStatistics();
+    loadTaskStatistics(); 
+    loadSidebarTags();
 }
 
 // Hàm lấy thống kê về công việc

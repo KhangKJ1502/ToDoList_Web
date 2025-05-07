@@ -22,15 +22,7 @@
 
         <!-- Render Categories Partial View -->
         @await Html.PartialAsync("~/Views/Category/_Categories.cshtml")
-
-        <div class="sidebar-tags">
-            <h3>Thẻ</h3>
-            <ul class="tag-list">
-                <li>Khẩn cấp</li>
-                <li>Tuần này</li>
-                <li>Dự án A</li>
-            </ul>
-        </div>
+        @await Html.PartialAsync("~/Views/Tag/_tag.cshtml")
     </div>
 
     <!-- Main Content -->
@@ -73,81 +65,19 @@
         </div>
 
         <!-- Due Today Section -->
-        <div class="tasks-section">
+        <div class="tasks-section" id="today-tasks">
             <div class="section-header">
                 <h2>Công việc hôm nay</h2>
             </div>
-
-            <ul class="task-list">
-                <li class="task-item">
-                    <input type="checkbox" class="task-checkbox">
-                    <div class="task-content">
-                        <div class="task-title">Họp với nhóm phát triển</div>
-                        <div class="task-meta">
-                            <div class="task-due">Hôm nay, 14:00</div>
-                            <div class="task-priority priority-high">Quan trọng</div>
-                            <div class="task-category">Công việc</div>
-                        </div>
-                    </div>
-                </li>
-
-                <li class="task-item">
-                    <input type="checkbox" class="task-checkbox">
-                    <div class="task-content">
-                        <div class="task-title">Hoàn thiện báo cáo quý</div>
-                        <div class="task-meta">
-                            <div class="task-due">Hôm nay, 17:30</div>
-                            <div class="task-priority priority-medium">Trung bình</div>
-                            <div class="task-category">Công việc</div>
-                        </div>
-                    </div>
-                </li>
-            </ul>
+            <ul class="task-list"></ul>
         </div>
 
         <!-- Upcoming Section -->
-        <div class="tasks-section">
+        <<div class="tasks-section" id="upcoming-tasks">
             <div class="section-header">
                 <h2>Sắp tới</h2>
             </div>
-
-            <ul class="task-list">
-                <li class="task-item">
-                    <input type="checkbox" class="task-checkbox">
-                    <div class="task-content">
-                        <div class="task-title">Đọc sách về quản lý thời gian</div>
-                        <div class="task-meta">
-                            <div class="task-due">Ngày mai, 09:00</div>
-                            <div class="task-priority priority-low">Thấp</div>
-                            <div class="task-category">Cá nhân</div>
-                        </div>
-                    </div>
-                </li>
-
-                <li class="task-item">
-                    <input type="checkbox" class="task-checkbox">
-                    <div class="task-content">
-                        <div class="task-title">Tìm hiểu về React Hook</div>
-                        <div class="task-meta">
-                            <div class="task-due">30/04/2025</div>
-                            <div class="task-priority priority-medium">Trung bình</div>
-                            <div class="task-category">Học tập</div>
-                        </div>
-                    </div>
-                </li>
-
-                <li class="task-item">
-                    <input type="checkbox" class="task-checkbox">
-                    <div class="task-content">
-                        <div class="task-title">Gửi email cho khách hàng</div>
-                        <div class="task-meta">
-                            <div class="task-due">02/05/2025</div>
-                            <div class="task-priority priority-high">Quan trọng</div>
-                            <div class="task-category">Công việc</div>
-                        </div>
-                    </div>
-                </li>
-            </ul>
+            <ul class="task-list"></ul>
         </div>
 
         <!-- Add Task Button -->
@@ -244,7 +174,7 @@
                         <button class="subtask-remove">×</button>
                     </div>
                 </div>
-                <button class="add-subtask">
+                <button onclick="AddTask()" class="add-subtask">
                     <span>+</span> Thêm công việc nhỏ
                 </button>
             </div>
@@ -264,41 +194,7 @@
     <script src="~/js/dashboard.js"></script>
     <script src="~/js/task.js"></script>
     <!-- Thêm tham chiếu đến category.js -->
+    <script src="~/js/tag.js"></script>
     <script src="~/js/category.js"></script>
+
 }
-
-<script>
-    // Dashboard specific functions
-    function addNote() {
-        document.getElementById("modalAddTask").style.display = "flex";
-    }
-
-    function closeModal() {
-        document.getElementById("modalAddTask").style.display = "none";
-    }
-
-    // Add event to close modal when clicking outside
-    window.onclick = function(event) {
-        let modalTask = document.getElementById("modalAddTask");
-
-        if (event.target === modalTask) {
-            modalTask.style.display = "none";
-        }
-
-        // Các sự kiện đóng modal category được xử lý trong category.js
-    }
-
-    // Show notification toast
-    function showToast(message, type = 'success') {
-        const toastContainer = document.getElementById('toastContainer');
-        const toast = document.createElement('div');
-        toast.className = `toast ${type}`;
-        toast.textContent = message;
-
-        toastContainer.appendChild(toast);
-
-        setTimeout(() => {
-            toast.remove();
-        }, 3000);
-    }
-</script>

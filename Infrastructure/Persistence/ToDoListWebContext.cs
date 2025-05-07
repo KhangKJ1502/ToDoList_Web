@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.IO;
 using Infrastructure.Persistence.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -33,6 +35,9 @@ public partial class ToDoListWebContext : DbContext
 
     public virtual DbSet<User> Users { get; set; }
 
+    // Add DbSet for TaskTag
+    public virtual DbSet<TaskTag> TaskTags { get; set; }
+
     private string GetConnectionString()
     {
         IConfiguration config = new ConfigurationBuilder()
@@ -40,19 +45,41 @@ public partial class ToDoListWebContext : DbContext
                     .AddJsonFile("appsettings.json", true, true)
                     .Build();
         var strConn = config["ConnectionStrings:DefaultConnectionStringDB"];
-        //                          DẤU CÁCH VÀ 9 TRIỆU (6T + 3T
-        //MessageBox.Show($"🔍 Chuỗi kết nối đọc được: {strConn}1"); // Debug
-        // if (string.IsNullOrEmpty(strConn)) {
-        //     throw new Exception("⚠ Lỗi: Không tìm thấy chuỗi kết nối trong appsettings.json!");
-        // }
         return strConn;
     }
+
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         optionsBuilder.UseSqlServer(GetConnectionString());
     }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Other entity configurations...
+
+        // Configure TaskTag entity
+        modelBuilder.Entity<TaskTag>(entity =>
+        {
+            entity.HasKey(e => new { e.TaskId, e.TagId });
+
+            entity.ToTable("TaskTags");
+
+            entity.Property(e => e.TaskId).HasColumnName("TaskID");
+            entity.Property(e => e.TagId).HasColumnName("TagID");
+
+            entity.HasOne(d => d.Task)
+                .WithMany()
+                .HasForeignKey(d => d.TaskId)
+                .HasConstraintName("FK_TaskTags_Task");
+
+            entity.HasOne(d => d.Tag)
+                .WithMany()
+                .HasForeignKey(d => d.TagId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_TaskTags_Tag");
+        });
+
+        // Existing entity configurations...
         modelBuilder.Entity<Attachment>(entity =>
         {
             entity.HasKey(e => e.AttachmentId).HasName("PK__Attachme__442C64DE9D9D664A");
@@ -196,23 +223,18 @@ public partial class ToDoListWebContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK_Tasks_User");
 
-            entity.HasMany(d => d.Tags).WithMany(p => p.Tasks)
-                .UsingEntity<Dictionary<string, object>>(
-                    "TaskTag",
-                    r => r.HasOne<Tag>().WithMany()
-                        .HasForeignKey("TagId")
-                        .OnDelete(DeleteBehavior.ClientSetNull)
-                        .HasConstraintName("FK_TaskTags_Tag"),
-                    l => l.HasOne<Models.Task>().WithMany()
-                        .HasForeignKey("TaskId")
-                        .HasConstraintName("FK_TaskTags_Task"),
-                    j =>
-                    {
-                        j.HasKey("TaskId", "TagId").HasName("PK__TaskTags__AA3E86754DFD5F79");
-                        j.ToTable("TaskTags");
-                        j.IndexerProperty<int>("TaskId").HasColumnName("TaskID");
-                        j.IndexerProperty<int>("TagId").HasColumnName("TagID");
-                    });
+            // Update this part to use the TaskTag entity instead of Dictionary approach
+            entity.HasMany(d => d.Tags)
+                .WithMany(p => p.Tasks)
+                .UsingEntity<TaskTag>(
+                    j => j.HasOne(tt => tt.Tag)
+                        .WithMany()
+                        .HasForeignKey(tt => tt.TagId),
+                    j => j.HasOne(tt => tt.Task)
+                        .WithMany()
+                        .HasForeignKey(tt => tt.TaskId),
+                    j => j.HasKey(tt => new { tt.TaskId, tt.TagId })
+                );
         });
 
         modelBuilder.Entity<User>(entity =>

@@ -35,9 +35,16 @@ namespace Web
             builder.Services.AddHttpContextAccessor();
             builder.Services.AddScoped<UserToolsCommon>();
 
-            //Category
+            //Register Repository 
+            builder.Services.AddScoped<ITaskRepository, TaskRepository>();
+            builder.Services.AddScoped<ISubTaskRepository, SubTaskRepository>();
+            builder.Services.AddScoped<IReminderRepository, ReminderRepository>();
             builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+            builder.Services.AddScoped<ITagRepository, TagRepository>();
+
+            //Register Service 
             builder.Services.AddScoped<ICategoryService, CategoryService>();
+            builder.Services.AddScoped<ITaskService, TaskService>();
 
             //4. Cấu Hình để luu Trữ côokie nguoi dung 
             builder.Services.AddAuthentication("MyCookieAuth")

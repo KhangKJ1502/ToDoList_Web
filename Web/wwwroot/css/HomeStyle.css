@@ -694,10 +694,10 @@ textarea.form-control {
     text-align: center;
     font-style: italic;
     color: #666;
-}
+} ` 
 
 .error {
-    color: #f44336;
+    color: #ffffff;
 }
 
 /* ----- RESPONSIVE DESIGN ----- */

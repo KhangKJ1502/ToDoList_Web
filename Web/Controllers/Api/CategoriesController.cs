@@ -10,7 +10,7 @@ namespace WebUI.Controllers.Api
     [Route("api/")]
     public class CategoriesController : ControllerBase
     {
-        private readonly ICategoryService _categoryService;
+        private readonly ICategoryService _categoryService; 
         private readonly UserToolsCommon _tools;
         private readonly ILogger<CategoriesController> _logger;
 
