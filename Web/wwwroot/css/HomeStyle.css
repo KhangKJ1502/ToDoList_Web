@@ -747,4 +747,88 @@ textarea.form-control {
         width: 95%;
         max-height: 95vh;
     }
+} 
+
+/*UUpdate Status*/
+/* Thêm các styles này vào file CSS của bạn */
+
+/* Trạng thái cập nhật */
+.task-item.updating {
+    opacity: 0.7;
+    position: relative;
+}
+
+    .task-item.updating::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
+        width: 16px;
+        height: 16px;
+        border: 2px solid rgba(0, 0, 0, 0.2);
+        border-top: 2px solid #3498db;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+/* Hiệu ứng hoàn thành */
+.task-item.completed {
+    background-color: rgba(46, 204, 113, 0.1);
+    border-left: 3px solid #2ecc71;
+}
+
+.task-item .task-title.line-through {
+    text-decoration: line-through;
+    color: #7f8c8d;
+}
+
+/* Hiệu ứng chuyển động */
+.task-item.fade-out {
+    opacity: 0;
+    transform: translateX(20px);
+    transition: all 0.3s ease;
+}
+
+.task-item.fade-in {
+    opacity: 0;
+    transform: translateX(-20px);
+    transition: none;
+    animation: fadeIn 0.3s ease forwards;
+}
+
+@keyframes spin {
+    0% {
+        transform: translateY(-50%) rotate(0deg);
+    }
+
+    100% {
+        transform: translateY(-50%) rotate(360deg);
+    }
+}
+
+@keyframes fadeIn {
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Style cho task hoàn thành */
+#completed-tasks .task-item {
+    background-color: rgba(46, 204, 113, 0.1);
+    border-left: 3px solid #2ecc71;
+}
+
+#completed-tasks .task-title {
+    text-decoration: line-through;
+    color: #7f8c8d;
+}
+
+/* Style cho thông báo rỗng */
+.empty-message {
+    padding: 15px;
+    text-align: center;
+    color: #95a5a6;
+    font-style: italic;
 }

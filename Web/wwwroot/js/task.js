@@ -159,7 +159,7 @@ async function submitTask() {
             const result = await response.json();
             showToast("Tạo công việc thành công!");
             closeModal();
-            await refreshTaskList(); 
+            await refreshTaskList();
             await loadSidebarTags(); // Thêm dòng này để tải lại tags trong sidebar
         } else {
             const errorData = await response.json();
@@ -222,9 +222,29 @@ async function fetchAndDisplayTasks() {
             console.log("No upcoming tasks API available, using empty array");
         }
 
+        // Fetch completed tasks
+        let completedTasks = [];
+        try {
+            const completedResponse = await fetch('/api/tasks/completed');
+            if (completedResponse.ok) {
+                const completedData = await completedResponse.json();
+                completedTasks = (completedData.data || completedData || []).map(task => ({
+                    taskId: task.id || task.taskId,
+                    title: task.title || "Không có tiêu đề",
+                    priority: task.priority || "medium",
+                    dueDate: task.dueDate || new Date().toISOString(),
+                    categoryName: task.categoryName || "Uncategorized",
+                    status: task.status || "completed"
+                }));
+            }
+        } catch (error) {
+            console.log("Error fetching completed tasks:", error);
+        }
+
         // Find and update the task sections
         const todayTasksSection = document.getElementById('today-tasks');
         const upcomingTasksSection = document.getElementById('upcoming-tasks');
+        const completedTasksSection = document.getElementById('completed-tasks');
 
         if (todayTasksSection) {
             updateTaskSection('Công việc hôm nay', formattedTodayTasks, '#today-tasks');
@@ -236,6 +256,12 @@ async function fetchAndDisplayTasks() {
             updateTaskSection('Sắp tới', upcomingTasks, '#upcoming-tasks');
         } else {
             console.error("Could not find upcoming-tasks section");
+        }
+
+        if (completedTasksSection) {
+            updateTaskSection('Đã hoàn thành', completedTasks, '#completed-tasks');
+        } else {
+            console.error("Could not find completed-tasks section");
         }
 
         // Update dashboard statistics
@@ -262,9 +288,11 @@ async function searchTasks(event) {
 
         const todayResults = results.today || [];
         const upcomingResults = results.upcoming || [];
+        const completedResults = results.completed || [];
 
         updateTaskSection('Kết quả tìm kiếm cho công việc hôm nay', todayResults, '#today-tasks');
         updateTaskSection('Kết quả tìm kiếm cho công việc sắp tới', upcomingResults, '#upcoming-tasks');
+        updateTaskSection('Kết quả tìm kiếm cho công việc đã hoàn thành', completedResults, '#completed-tasks');
     } catch (error) {
         console.error('Error searching tasks:', error);
         showToast("Không thể tìm kiếm công việc", "error");
@@ -445,6 +473,11 @@ function createTaskElement(task) {
     title.className = 'task-title';
     title.textContent = task.title || 'Không có tiêu đề';
 
+    // Nếu task đã hoàn thành, thêm class để hiển thị gạch ngang
+    if (task.status === 'completed') {
+        title.classList.add('completed');
+    }
+
     const meta = document.createElement('div');
     meta.className = 'task-meta';
 
@@ -474,8 +507,10 @@ function createTaskElement(task) {
 /**
  * Cập nhật trạng thái hoàn thành của task
  */
-async function updateTaskStatus(taskId, completed) {
+async function updateTaskStatus(taskId, isCompleted) {
     try {
+        const newStatus = isCompleted ? 'completed' : 'in_progress';
+        console.log("TaskID: ", taskId)
         const response = await fetch(`/api/tasks/${taskId}/status`, {
             method: 'PUT',
             headers: {
@@ -483,17 +518,90 @@ async function updateTaskStatus(taskId, completed) {
                 'X-CSRF-TOKEN': getCSRFToken()
             },
             body: JSON.stringify({
-                status: completed ? 'completed' : 'in_progress'
+                status: newStatus
             })
         });
 
         if (!response.ok) throw new Error('Không thể cập nhật trạng thái');
 
-        showToast(`Công việc đã ${completed ? 'hoàn thành' : 'đang thực hiện'}`);
+        const result = await response.json();
+        if (!result.success) {
+            throw new Error(result.message || 'Cập nhật trạng thái thất bại');
+        }
+
+        showToast(`Công việc đã ${isCompleted ? 'hoàn thành' : 'đang thực hiện'}`);
+
+        // Cập nhật UI
+        const taskElement = document.querySelector(`[data-task-id="${taskId}"]`);
+        if (taskElement) {
+            const titleElement = taskElement.querySelector('.task-title');
+            if (titleElement) {
+                if (isCompleted) {
+                    titleElement.classList.add('completed');
+                } else {
+                    titleElement.classList.remove('completed');
+                }
+            }
+
+            // Di chuyển task đến section phù hợp
+            const taskListContainer = isCompleted
+                ? document.querySelector('#completed-tasks .task-list')
+                : document.querySelector('#today-tasks .task-list');
+
+            if (taskListContainer) {
+                // Xóa thông báo trống nếu có
+                const emptyMessage = taskListContainer.querySelector('.empty-message');
+                if (emptyMessage) emptyMessage.remove();
+
+                // Di chuyển task
+                taskElement.remove();
+                taskListContainer.appendChild(taskElement);
+
+                // Kiểm tra và thêm thông báo trống cho section cũ
+                checkAndUpdateEmptySection(isCompleted ? '#today-tasks' : '#completed-tasks');
+            }
+        }
+
         await updateDashboardStats();
     } catch (error) {
         console.error('Lỗi khi cập nhật trạng thái task:', error);
-        showToast('Không thể cập nhật trạng thái công việc', 'error');
+        showToast(error.message || 'Không thể cập nhật trạng thái công việc', 'error');
+
+        // Khôi phục trạng thái checkbox nếu có lỗi
+        const checkbox = document.querySelector(`[data-task-id="${taskId}"] .task-checkbox`);
+        if (checkbox) {
+            checkbox.checked = !isCompleted;
+        }
+    }
+}
+
+/**
+ * Kiểm tra và cập nhật thông báo khi section trống
+ */
+function checkAndUpdateEmptySection(sectionSelector) {
+    const section = document.querySelector(sectionSelector);
+    if (!section) return;
+
+    const taskList = section.querySelector('.task-list');
+    if (!taskList) return;
+
+    // Kiểm tra nếu không còn task nào (ngoại trừ thông báo trống)
+    const tasks = taskList.querySelectorAll('.task-item');
+    if (tasks.length === 0) {
+        // Kiểm tra nếu đã có thông báo trống rồi thì không thêm nữa
+        const existingEmptyMessage = taskList.querySelector('.empty-message');
+        if (!existingEmptyMessage) {
+            const emptyItem = document.createElement('li');
+            emptyItem.textContent = 'Không có công việc nào';
+            emptyItem.className = 'empty-message';
+            taskList.appendChild(emptyItem);
+        }
+    } else {
+        // Xóa thông báo trống nếu có task
+        const emptyMessage = taskList.querySelector('.empty-message');
+        if (emptyMessage) {
+            emptyMessage.remove();
+        }
     }
 }
 
@@ -531,6 +639,43 @@ async function refreshTaskList() {
         console.error('Lỗi khi làm mới danh sách task:', error);
         // Don't reload the page automatically, just show an error
         showToast('Không thể làm mới danh sách công việc', 'error');
+    }
+}
+
+/**
+ * Tải lại danh sách tag trong sidebar
+ */
+async function loadSidebarTags() {
+    try {
+        // Gọi API để lấy danh sách tag đã cập nhật
+        const response = await fetch('/api/tags');
+        if (!response.ok) throw new Error('Không thể tải danh sách thẻ');
+
+        const tags = await response.json();
+
+        // Cập nhật danh sách tag trong sidebar
+        const tagList = document.querySelector('.tag-list');
+        if (tagList) {
+            tagList.innerHTML = ''; // Xóa danh sách hiện tại
+
+            if (tags.length === 0) {
+                tagList.innerHTML = '<li class="empty-item">Không có thẻ nào</li>';
+            } else {
+                tags.forEach(tag => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                        <a href="#" data-tag-id="${tag.tagId}">
+                            <span class="tag-color" style="background-color: ${tag.color || '#3498db'}"></span>
+                            <span class="tag-name">${tag.name}</span>
+                            <span class="tag-count">${tag.count || 0}</span>
+                        </a>
+                    `;
+                    tagList.appendChild(li);
+                });
+            }
+        }
+    } catch (error) {
+        console.error('Lỗi khi tải danh sách thẻ:', error);
     }
 }
 

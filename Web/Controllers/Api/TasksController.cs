@@ -3,6 +3,7 @@ using Application.Interfaces;
 using Domain.Entities;
 using Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using Web.Controllers;
 using WebUI.Commons;
 
 namespace WebUI.Controllers.Api
@@ -15,8 +16,10 @@ namespace WebUI.Controllers.Api
         private readonly ITagRepository _tagRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly UserToolsCommon _userToolsCommon;
+        private readonly ILogger<TasksController> _logger;
 
         public TasksController(
+            ILogger<TasksController> Logger,
             ICategoryRepository categoryRepository,
             ITagRepository tagRepository,
             ITaskService taskService,
@@ -26,6 +29,7 @@ namespace WebUI.Controllers.Api
             _tagRepository = tagRepository;
             _categoryRepository = categoryRepository;
             _userToolsCommon = userToolsCommon;
+            _logger = Logger;
         }
 
         [HttpPost]
@@ -112,7 +116,6 @@ namespace WebUI.Controllers.Api
 
         [HttpGet]
         [Route("tasks/upcoming")]
-
         public async Task<IActionResult> GetListTaskUpcoming()
         {
             int? userId  = _userToolsCommon.GetIdUser();
@@ -129,10 +132,58 @@ namespace WebUI.Controllers.Api
                 success = true,
                 data = TaskUpComing
             });
-
-
         }
 
+        [HttpPut]
+        [Route("taskS/{taskId}/status")]
+        public async Task<IActionResult> UpdateStatus([FromRoute] int taskId, [FromBody] StatusUpdateModel model)
+        {
+            int? userId = _userToolsCommon?.GetIdUser();
+            if (userId == null)
+                return Unauthorized();
+
+            _logger.LogInformation("Task ID: {TaskId}", taskId);
+            if (taskId == 0)
+                return BadRequest(new { success = false, message = "Invalid task ID" });
+
+            // Gọi service để cập nhật trạng thái task với status từ model
+            var result = await _taskService.UpdateTaskStatus(taskId);
+
+            if (!result)
+                return BadRequest(new { success = false, message = "Failed to update task status" });
+
+            return Ok(new
+            {
+                success = true,
+                message = "Task status updated successfully",
+                taskId = taskId,
+                status = model.Status
+            });
+        }
+
+
+        [HttpGet]
+        [Route("tasks/completed")]
+        public async Task<IActionResult> GetCompletedTasks()
+        {
+            int? userId = _userToolsCommon?.GetIdUser();
+
+            if (userId == null) {
+                return Unauthorized();
+            }
+
+            var completedTasks = await _taskService.GetCompletedTasks(userId.Value);
+            if (completedTasks == null) {
+                return BadRequest(new { success = false, message = "Không có công việc đã hoàn thành" });
+            }
+
+            // Return the tasks with success status
+            return Ok(new
+            {
+                success = true,
+                data = completedTasks
+            });
+        }
 
     }
 }

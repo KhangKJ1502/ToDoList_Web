@@ -55,8 +55,6 @@ public partial class ToDoListWebContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // Other entity configurations...
-
         // Configure TaskTag entity
         modelBuilder.Entity<TaskTag>(entity =>
         {
@@ -68,12 +66,12 @@ public partial class ToDoListWebContext : DbContext
             entity.Property(e => e.TagId).HasColumnName("TagID");
 
             entity.HasOne(d => d.Task)
-                .WithMany()
+                .WithMany(p => p.TaskTags)
                 .HasForeignKey(d => d.TaskId)
                 .HasConstraintName("FK_TaskTags_Task");
 
             entity.HasOne(d => d.Tag)
-                .WithMany()
+                .WithMany(p => p.TaskTags)
                 .HasForeignKey(d => d.TagId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_TaskTags_Tag");
@@ -184,7 +182,8 @@ public partial class ToDoListWebContext : DbContext
             entity.Property(e => e.Name).HasMaxLength(30);
             entity.Property(e => e.UserId).HasColumnName("UserID");
 
-            entity.HasOne(d => d.User).WithMany(p => p.Tags)
+            entity.HasOne(d => d.User)
+                .WithMany(p => p.Tags)
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK_Tags_User");
         });
@@ -223,18 +222,23 @@ public partial class ToDoListWebContext : DbContext
                 .HasForeignKey(d => d.UserId)
                 .HasConstraintName("FK_Tasks_User");
 
-            // Update this part to use the TaskTag entity instead of Dictionary approach
-            entity.HasMany(d => d.Tags)
-                .WithMany(p => p.Tasks)
+            // Configure the many-to-many relationship between Task and Tag through TaskTag
+            entity.HasMany(t => t.Tags)
+                .WithMany(t => t.Tasks)
                 .UsingEntity<TaskTag>(
-                    j => j.HasOne(tt => tt.Tag)
-                        .WithMany()
+                    j => j
+                        .HasOne(tt => tt.Tag)
+                        .WithMany(t => t.TaskTags)
                         .HasForeignKey(tt => tt.TagId),
-                    j => j.HasOne(tt => tt.Task)
-                        .WithMany()
+                    j => j
+                        .HasOne(tt => tt.Task)
+                        .WithMany(t => t.TaskTags)
                         .HasForeignKey(tt => tt.TaskId),
-                    j => j.HasKey(tt => new { tt.TaskId, tt.TagId })
-                );
+                    j =>
+                    {
+                        j.HasKey(tt => new { tt.TaskId, tt.TagId });
+                        j.ToTable("TaskTags");
+                    });
         });
 
         modelBuilder.Entity<User>(entity =>

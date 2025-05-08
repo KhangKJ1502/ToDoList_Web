@@ -13,6 +13,9 @@ namespace Application.Interfaces
         Task<bool> AddTask(TaskDTO task);
         Task<List<TaskDashboard>> GetListTaskToday(int UserId);
         Task<List<TaskDashboard>> GetListTaskUpcoming(int UserId);
-      
+
+        Task<bool> UpdateTaskStatus(int taskId);
+        Task<IEnumerable<TaskDashboard>> GetCompletedTasks(int userId);
+
     }
 }

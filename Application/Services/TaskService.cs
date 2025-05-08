@@ -60,6 +60,7 @@ namespace Application.Services
             return taskId > 0;
         }
 
+
         public async Task<List<TaskDashboard>> GetListTaskToday(int userId)
         {
             var allTasks = await _taskRepository.GetListTaskAsync(userId);
@@ -106,6 +107,29 @@ namespace Application.Services
             return taskDashboards;
         }
 
+        public async Task<bool> UpdateTaskStatus(int taskId)
+        {
+            bool isAffect = await _taskRepository.UpdateTaskAsync(taskId);
+            if (!isAffect) 
+                return isAffect;
+            
+            return isAffect;
+        }
+        public async Task<IEnumerable<TaskDashboard>> GetCompletedTasks(int userId)
+        {
+            var TaskRepo = await _taskRepository.GetTaskCompletedAsync(userId);
+
+            var TaskService = TaskRepo.Select(t => new TaskDashboard
+            {
+                Id = t.Id,
+                Priority = t.Priority,
+                Title = t.Title,
+                dueDate = t.DueDate.HasValue ? DateOnly.FromDateTime(t.DueDate.Value) : default,
+                UserId = userId
+            }).ToList();
+
+            return TaskService;
+        }
 
     }
 }

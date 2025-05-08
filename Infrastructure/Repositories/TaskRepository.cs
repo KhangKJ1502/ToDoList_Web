@@ -127,7 +127,7 @@ namespace Infrastructure.Repositories
         public async Task<List<Domain.Entities.Task>> GetListTaskAsync(int userId)
         {
             var dbTasks = await _context.Tasks
-                .Where(t => t.UserId == userId)
+                .Where(t => t.UserId == userId && !t.Status.Equals("completed"))
                 .ToListAsync();
 
             var domainTasks = dbTasks.Select(t => new Domain.Entities.Task
@@ -142,6 +142,40 @@ namespace Infrastructure.Repositories
             }).ToList();
 
             return domainTasks;
+        }
+
+        public async Task<IEnumerable<Domain.Entities.Task>> GetTaskCompletedAsync(int UserId)
+        {
+            string status = "completed";
+            var TaskCompleted = await _context.Tasks.Where(t => t.UserId == UserId && t.Status.Equals(status) ).ToListAsync();
+
+            var Task = TaskCompleted.Select(t => new Domain.Entities.Task
+            {
+                Id = t.TaskId,
+                Title = t.Title,
+                Description = t.Description,
+                Priority = t.Priority,
+                DueDate = t.DueDate,
+                UserId = t.UserId
+            }).ToList();
+            return Task;
+        }
+
+        public async Task<bool> UpdateTaskAsync(int taskId)
+        {
+            // Giả sử bạn đang dùng Entity Framework và có _dbContext
+            var task = await _context.Tasks.FindAsync(taskId);
+
+            if (task == null)
+                return false; // Không tìm thấy task
+
+            // Cập nhật trạng thái – ví dụ đánh dấu là hoàn thành
+            task.Status = "Completed"; // hoặc true/false nếu là bool
+
+            // Lưu thay đổi
+            await _context.SaveChangesAsync();
+
+            return true;
         }
 
     }

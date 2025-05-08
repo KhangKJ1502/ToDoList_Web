@@ -45,6 +45,7 @@ namespace Web
             //Register Service 
             builder.Services.AddScoped<ICategoryService, CategoryService>();
             builder.Services.AddScoped<ITaskService, TaskService>();
+            builder.Services.AddScoped<ITagService, TagService>();
 
             //4. Cấu Hình để luu Trữ côokie nguoi dung 
             builder.Services.AddAuthentication("MyCookieAuth")

@@ -1,4 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Application.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using System.Net;
+using WebUI.Commons;
 
 namespace WebUI.Controllers.Api
 {
@@ -6,9 +9,33 @@ namespace WebUI.Controllers.Api
     [Route("api/")]
     public class TagController : ControllerBase
     {
-        public async Task<IActionResult> GetAllTags()
+        private readonly ITagService tagService;
+        private readonly UserToolsCommon userToolsCommon;
+
+        public TagController(ITagService tagService, UserToolsCommon toolsCommon)
         {
-            return Ok();
+            this.tagService = tagService;
+            this.userToolsCommon = toolsCommon;
+        }
+
+        [HttpGet]
+        [Route("tags")]
+        public async Task<IActionResult> GetAllTags() 
+        {
+            int? userId = userToolsCommon.GetIdUser();
+
+            if (userId == null) 
+                return Unauthorized();
+
+            var Tags = await tagService.GetAllsTags(userId.Value); 
+
+            if (Tags == null) {
+                return BadRequest(new {success = false, message ="Khong the tai trang" });
+            }
+            return Ok(new {success = true, 
+                message="Tai thanh cong",
+                data=Tags
+            });
         }
     }
 }
