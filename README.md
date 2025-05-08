@@ -7,4 +7,4 @@ Sơ Lược Về Project:
    -Quản lý Task/Subtask dạng phân cấp.
    -Gán nhiều Tags cho mỗi Task (mối quan hệ nhiều-nhiều).
    -Đặt lời nhắc (Reminders) cho Task theo thời gian cụ thể.
-   - Giao diện thân thiện, dễ sử dụng và có phân quyền người dùng.
+   -Giao diện thân thiện, dễ sử dụng và có phân quyền người dùng.
